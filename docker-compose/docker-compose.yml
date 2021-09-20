@@ -9,8 +9,6 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: blog
+      MYSQL_DATABASE: todo
       MYSQL_ROOT_PASSWORD: admin
-  web:
-    image: nginx
 
