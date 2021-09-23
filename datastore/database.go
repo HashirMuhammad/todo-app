@@ -21,21 +21,28 @@ func (d Database) CreateItem(todo models.TodoItem) error {
 
 func (d Database) GetItemByID(Id int) (models.TodoItem, error) {
 	todo := models.TodoItem{}
-	err := d.conn.Select(&todo, Id).Exec("SELECT Id FROM TodoItem", &todo.Id).Error
-	//if err != nil {
-	//	return todo, err
-	//}
+	err := d.conn.Where("id = ? ", Id).Find(&todo).Error
+	if err != nil {
+		return todo, err
+	}
 
 	return todo, err
 }
 
-func (d Database) Update(item models.TodoItem, ID int) error {
-	err := d.conn.Update(&item, ID).Error
+func (d Database) Update(ID int) error {
+	err := d.conn.Model(models.TodoItem{Id: ID}).Update(map[string]interface{}{"completed": true}).Error
 	return err
 }
-func (d Database) Delete(item models.TodoItem, ID int) error  {
+
+func (d Database) Delete(item models.TodoItem, ID int) error {
 	err := d.conn.Delete(&item, ID).Error
 	return err
-
 }
 
+func (d Database) GetTodoItems(completed bool) ([]models.TodoItem, error) {
+	var todo []models.TodoItem
+	if err := d.conn.Where("completed = ?", completed).Find(&todo).Error; err != nil {
+		return todo, err
+	}
+	return todo, nil
+}
