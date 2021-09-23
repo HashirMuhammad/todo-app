@@ -3,12 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HashirMuhammad/todo-app/datastore"
-	"github.com/HashirMuhammad/todo-app/models"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/HashirMuhammad/todo-app/datastore"
+	"github.com/HashirMuhammad/todo-app/models"
+	"github.com/gorilla/mux"
 )
 
 type Controller struct {
@@ -31,50 +32,47 @@ func (c Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
-	// Test if the TodoItem exist in DB
-	todo, err := c.Db.GetItemByID(id)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(`{"updated": false, "error": "Record Not Found"}`)
-		return
-	}
-
-	completed, err := strconv.ParseBool(r.FormValue("completed"))
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(`{"updated": false, "error": "Bad Request"}`)
-		return
-	}
-
-	todo.Completed = completed
-	err = c.Db.Update(todo, id)
+	err := c.Db.Update(id)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(`{"updated": false, "error": "error"}`)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	io.WriteString(w, `{"updated": true}`)
+	json.NewEncoder(w).Encode(`{"updated": true}`)
 }
 
 func (c Controller) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	// Get URL parameter from mux
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
-
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		json.NewEncoder(w).Encode(fmt.Sprintf("err: %s", err.Error()))
+	}
 	// Test if the TodoItem exist in DB
+	w.Header().Set("Content-Type", "application/json")
+
 	todo, err := c.Db.GetItemByID(id)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"deleted": false, "error": "Record Not Found"}`)
 		return
 	}
-		err = c.Db.Delete(todo, id)
-	if  err != nil {
-		w.Header().Set("Content-Type", "application/json")
+
+	if err = c.Db.Delete(todo, id); err != nil {
 		json.NewEncoder(w).Encode(`{"updated": false, "error": "error"}`)
 		return
 	}
-		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, `{"deleted": true}`)
+
+	json.NewEncoder(w).Encode(`{"deleted": true}`)
+}
+
+func (c Controller) GetAllItems(w http.ResponseWriter, r *http.Request) {
+	form, _ := strconv.ParseBool(r.FormValue("completed"))
+	// form= strconv.ParseBool(form)
+	items, err := c.Db.GetTodoItems(form)
+	if err != nil {
+		json.NewEncoder(w).Encode(fmt.Sprintf("err: %s", err.Error()))
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(items)
 }
