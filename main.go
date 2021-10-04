@@ -6,9 +6,7 @@ import (
 
 	"github.com/HashirMuhammad/todo-app/controller"
 	"github.com/HashirMuhammad/todo-app/datastore"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/rs/cors"
 )
 

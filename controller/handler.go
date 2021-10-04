@@ -67,8 +67,8 @@ func (c Controller) DeleteItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) GetAllItems(w http.ResponseWriter, r *http.Request) {
-	form, _ := strconv.ParseBool(r.FormValue("completed"))
-	// form= strconv.ParseBool(form)
+	form, err := strconv.ParseBool(r.FormValue("completed"))
+
 	items, err := c.Db.GetTodoItems(form)
 	if err != nil {
 		json.NewEncoder(w).Encode(fmt.Sprintf("err: %s", err.Error()))

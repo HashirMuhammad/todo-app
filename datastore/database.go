@@ -2,7 +2,9 @@ package datastore
 
 import (
 	"github.com/HashirMuhammad/todo-app/models"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type Database struct {
